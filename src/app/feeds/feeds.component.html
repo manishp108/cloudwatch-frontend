@@ -1,0 +1,407 @@
+<main class="2xl:ml-[--w-side] xl:ml-[--w-side-md] md:ml-[--w-side-small]">
+  <div class="main__inner">
+    <div class="flex max-lg:flex-col xl:gap-10 md:gap-3" id="js-oversized">
+      <div
+        class="md:max-w-[510px] mx-auto flex-1 space-y-6 mt-20 px-3 sm:mx-0 sm:mt-0"
+      >
+        <!-- Loop through each feed -->
+        <div
+          *ngFor="let feed of feeds"
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+        >
+          <!-- Feed Header -->
+          <div class="flex gap-3 sm:p-4 p-2.5 text-sm font-medium">
+            <!-- Profile Picture with fallback to initial avatar -->
+            <ng-container
+              *ngIf="feed.title && !feed.imgError; else fallbackAvatar"
+            >
+              <img
+                [src]="feed.title"
+                alt="Profile Picture"
+                class="w-9 h-9 rounded-full"
+                (error)="feed.imgError = true"
+              />
+            </ng-container>
+            <ng-template #fallbackAvatar>
+              <div
+                class="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center text-xl font-semibold text-gray-700"
+              >
+                {{
+                  feed.authorUsername
+                    ? feed.authorUsername.charAt(0).toUpperCase()
+                    : "?"
+                }}
+              </div>
+            </ng-template>
+
+            <div class="flex-1">
+              <h4 class="text-black dark:text-white">
+                {{ feed.authorUsername }}
+                <ng-container
+                  *ngIf="feed.isVerified === true || feed.isVerified === 'true'"
+                >
+                  <i class="fa fa-check-circle text-blue-600"></i>
+                </ng-container>
+              </h4>
+              <div class="text-xs text-gray-500 dark:text-gray-400">
+                {{ feed.dateCreated | date : "MMM d, y, h:mm a" }}
+              </div>
+            </div>
+            <!-- Dropdown Trigger & Menu -->
+            <div class="relative">
+              <button
+                type="button"
+                (click)="toggleDropdown(feed)"
+                class="w-8 h-8 flex items-center justify-center focus:outline-none"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor"
+                  class="w-6 h-6 text-gray-600 dark:text-gray-300"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM18 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+              </button>
+              <div
+                *ngIf="feed.dropdownOpen"
+                class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-10"
+              >
+                <nav class="flex flex-col">
+                  <a
+                    href="#"
+                    (click)="
+                      downloadFile(feed.content);
+                      toggleDropdown(feed);
+                      $event.preventDefault()
+                    "
+                    class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-100"
+                  >
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download</span>
+                  </a>
+                  <a
+                    href="#"
+                    (click)="
+                      goToChatBox(feed);
+                      toggleDropdown(feed);
+                      $event.preventDefault()
+                    "
+                    class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-100"
+                  >
+                    <i class="fa-solid fa-message"></i>
+                    <span>Message</span>
+                  </a>
+                  <hr class="border-gray-200 dark:border-gray-600" />
+                  <!-- Updated Report link to open the report popup -->
+                  <a
+                    href="#"
+                    (click)="
+                      openReportPopup(feed);
+                      toggleDropdown(feed);
+                      $event.preventDefault()
+                    "
+                    class="flex items-center gap-2 px-4 py-2 text-red-500 hover:text-white hover:bg-red-50 dark:hover:bg-red-800/50"
+                  >
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Report</span>
+                  </a>
+                </nav>
+              </div>
+            </div>
+          </div>
+
+          <!-- Media Container -->
+          <div class="w-full rounded-xl overflow-hidden sm:px-4">
+            <ng-container *ngIf="isVideo(feed.content); else notVideo">
+              <app-video-player
+                [src]="feed.content"
+                [poster]="feed.thumbnail || '/assets/default-video-poster.jpg'"
+                [muted]="true"
+                [loop]="true"
+                class="w-full h-full object-cover"
+              ></app-video-player>
+            </ng-container>
+            <ng-template #notVideo>
+              <img
+                [src]="feed.content"
+                alt="Feed Content"
+                class="w-full h-full rounded-xl object-cover"
+              />
+            </ng-template>
+          </div>
+
+          <!-- Caption Container -->
+          <div class="px-4 py-2">
+            <span class="text-sm font-medium">{{ feed.caption }}</span>
+          </div>
+
+          <!-- Feed Actions -->
+          <div
+            class="sm:p-4 p-2.5 flex items-center gap-4 text-xs font-semibold"
+          >
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="likePost(feed)"
+                class="flex items-center justify-center w-8 h-8 rounded-full"
+                [ngClass]="
+                  feed.likeFlag == 0
+                    ? 'text-gray-500 bg-gray-100 dark:bg-gray-600'
+                    : 'text-red-500 bg-red-200 dark:bg-gray-500'
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  [attr.fill]="feed.likeFlag == 1 ? 'currentColor' : 'none'"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                  />
+                </svg>
+              </button>
+              <span>{{ feed.likeCount || 0 }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="toggleComments(feed)"
+                class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5 text-gray-700 dark:text-gray-300"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 8h10M7 12h4m1 8l-6-6H3a2 2 0 01-2-2V5a2 2 0 012-2h18a2 2 0 012 2v7a2 2 0 01-2 2h-4l-6 6z"
+                  />
+                </svg>
+              </button>
+              <span>{{ feed.commentCount || 0 }}</span>
+            </div>
+          </div>
+
+          <!-- Inline Comments Section -->
+          <div
+            *ngIf="feed.showComments"
+            class="sm:p-4 p-2.5 border-t border-gray-100 dark:border-gray-700 space-y-3"
+          >
+            <ng-container
+              *ngIf="feed.comments && feed.comments.length; else noComments"
+            >
+              <div
+                *ngFor="let comment of feed.comments"
+                class="flex items-start gap-3 relative"
+              >
+                <img
+                  [src]="
+                    comment.userProfileUrl || './assets/default_profile.png'
+                  "
+                  alt="Commenter"
+                  class="w-6 h-6 rounded-full"
+                  (error)="$event.target.src = './assets/default_profile.png'"
+                />
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <a
+                      href="#"
+                      class="text-black dark:text-white font-medium text-sm"
+                    >
+                      {{ comment.commentAuthorUsername }}
+                    </a>
+                    <!-- Edit/Delete options shown only if the logged-in user is the author -->
+                    <div
+                      *ngIf="comment.commentAuthorId === userId"
+                      class="relative"
+                    >
+                      <button
+                        (click)="comment.dropdownOpen = !comment.dropdownOpen"
+                        class="focus:outline-none"
+                      >
+                        <i class="fa fa-ellipsis-v text-gray-600"></i>
+                      </button>
+                      <div
+                        *ngIf="comment.dropdownOpen"
+                        class="absolute right-0 mt-2 w-32 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-lg z-10"
+                      >
+                        <button
+                          (click)="startEditingComment(comment)"
+                          class="w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-600 text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          (click)="
+                            deleteComment(feed, comment);
+                            comment.dropdownOpen = false
+                          "
+                          class="w-full text-left px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-600 text-sm text-red-500"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- If the comment is in editing mode, show an input box and a save button -->
+                  <div *ngIf="comment.editing; else displayComment">
+                    <input
+                      type="text"
+                      [(ngModel)]="comment.editingContent"
+                      class="w-full p-2 border rounded focus:outline-none"
+                    />
+                    <button
+                      (click)="saveEditedComment(comment, feed)"
+                      class="mt-1 bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
+                    >
+                      Save
+                    </button>
+                    <button
+                      (click)="cancelEditingComment(comment)"
+                      class="mt-1 bg-gray-300 text-black px-3 py-1 rounded text-sm hover:bg-gray-400 ml-2"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  <ng-template #displayComment>
+                    <p class="mt-0.5 text-sm text-gray-900 dark:text-gray-800">
+                      {{ comment.commentContent }}
+                    </p>
+                  </ng-template>
+                  <div class="text-xs text-gray-400">
+                    {{ comment.commentDateCreated | date : "MMM d, y, h:mm a" }}
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template #noComments>
+              <!-- Optionally show a message if no comments exist -->
+            </ng-template>
+            <!-- Add Comment Input -->
+            <div class="sm:px-4 sm:py-3 p-2.5 flex items-center gap-2">
+              <img
+                [src]="profilePic || './assets/default_profile.png'"
+                alt="Your Avatar"
+                class="w-6 h-6 rounded-full"
+                (error)="$event.target.src = './assets/default_profile.png'"
+              />
+              <div class="flex-1">
+                <textarea
+                  placeholder="Add a comment...."
+                  rows="1"
+                  class="w-full resize-none bg-transparent px-4 py-2 focus:outline-none"
+                  [(ngModel)]="feed.newComment"
+                ></textarea>
+              </div>
+              <button
+                type="button"
+                (click)="postComment(feed)"
+                class="text-sm rounded-full py-1.5 px-3.5 bg-blue-500 text-white hover:bg-blue-600"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+
+          <!-- Loader -->
+          <div
+            *ngIf="loading"
+            class="rounded-xl shadow-sm p-4 space-y-4 bg-gray-200/40 dark:bg-gray-800 animate-pulse"
+          >
+            <div class="flex gap-3">
+              <div class="w-9 h-9 rounded-full bg-gray-300/20"></div>
+              <div class="flex-1 space-y-3">
+                <div class="w-40 h-5 rounded-md bg-gray-300/20"></div>
+                <div class="w-24 h-4 rounded-md bg-gray-300/20"></div>
+              </div>
+              <div class="w-6 h-6 rounded-full bg-gray-300/20"></div>
+            </div>
+            <div class="w-full h-52 rounded-lg bg-gray-300/10 my-3"></div>
+            <div class="flex gap-3">
+              <div class="w-16 h-5 rounded-md bg-gray-300/20"></div>
+              <div class="w-14 h-5 rounded-md bg-gray-300/20"></div>
+              <div class="w-6 h-6 rounded-full bg-gray-300/20 ml-auto"></div>
+              <div class="w-6 h-6 rounded-full bg-gray-300/20"></div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="allFeedsLoaded" class="text-center py-4 text-gray-500">
+          All Feeds Loaded
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Report Popup -->
+<div
+  *ngIf="reportPopupOpen"
+  class="fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Modal Backdrop -->
+  <div
+    class="fixed inset-0 bg-black opacity-50"
+    (click)="closeReportPopup()"
+  ></div>
+  <!-- Modal Content -->
+  <div
+    class="bg-white dark:bg-gray-800 p-6 rounded-lg text-center shadow-lg z-50 w-80"
+  >
+    <ng-container *ngIf="!reportSubmitted; else thankYouTemplate">
+      <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-black">
+        Report Post
+      </h2>
+      <p class="mb-4 text-gray-600 dark:text-gray-600">
+        Please select a reason for reporting this post:
+      </p>
+      <div class="space-y-2 mb-4">
+        <div *ngFor="let reason of reportReasons">
+          <label class="flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="reportReason"
+              [value]="reason"
+              [(ngModel)]="selectedReportReason"
+              class="mr-2"
+            />
+            <span class="text-gray-700 dark:text-gray-800">{{ reason }}</span>
+          </label>
+        </div>
+      </div>
+      <div class="flex justify-between">
+        <button
+          (click)="closeReportPopup()"
+          class="px-4 py-2 mr-2 rounded border text-gray-700 dark:text-gray-800"
+        >
+          Cancel
+        </button>
+        <button
+          (click)="submitReport()"
+          class="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
+        >
+          Report Post
+        </button>
+      </div>
+    </ng-container>
+    <ng-template #thankYouTemplate>
+      <h2
+        class="text-lg font-semibold text-center mb-4 text-gray-800 dark:text-black"
+      >
+        Thank you for reporting.
+      </h2>
+    </ng-template>
+  </div>
+</div>
