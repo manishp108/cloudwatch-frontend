@@ -9,10 +9,15 @@ import { SharedService } from "../services/shared.service";
 })
 export class FeedsComponent implements OnInit {
   feeds: any[] = [];
-  loading: boolean = false;
-  allFeedsLoaded: boolean = true;
+
+  pageNumber = 1;
+  pageSize = 5;
+
+  loading = false;
+  allFeedsLoaded = false;
+
+  userId: string | undefined;
   
-  // These must be defined to fix the TS2339 error in your HTML
   reportPopupOpen: boolean = false; 
   selectedFeedForReport: any = null;
   reportSubmitted: boolean = false;
@@ -23,10 +28,42 @@ export class FeedsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log("FeedsComponent loaded in development mode.");
+    console.log("FeedsComponent loaded.");
+  
+      this.sharedService.getUserId().subscribe((userId) => {
+      this.userId = userId || undefined;
+    });
+      this.loadFeeds();
+  }
+  loadFeeds(): void {
+    if (this.loading || this.allFeedsLoaded) {
+      return;
+    }
+    this.loading = true;
+
+    this.feedService
+      .getFeeds(this.pageNumber, this.pageSize, this.userId)
+      .subscribe(
+        (response: any) => {
+          const newFeeds = response?.blogPostsMostRecent || [];
+
+          if (newFeeds.length > 0) {
+            this.feeds = [...this.feeds, ...newFeeds];
+            this.pageNumber++;
+          } else {
+            this.allFeedsLoaded = true;
+          }
+
+          this.loading = false;
+        },
+        (error) => {
+          console.error("Error loading feeds:", error);
+          this.loading = false;
+        }
+      );
   }
 
-  // Placeholder methods so the buttons in your HTML don't cause errors
+
   likePost(feed: any): void {}
   toggleComments(feed: any): void {}
   openReportPopup(feed: any): void {}
