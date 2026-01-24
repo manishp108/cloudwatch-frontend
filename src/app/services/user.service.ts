@@ -23,4 +23,11 @@ generateUserId(): Observable<UserData> {
   verifyGoogleToken(token: string): Observable<UserData> {
     return this.http.post<UserData>(`${this.apiUrl}/Account/google-verify-token`, { token });
   }
+  updateUser(formData: FormData): Observable<HttpEvent<any>> {
+    const req = new HttpRequest('POST', this.apiUrl + '/Users/updateUser', formData, {
+      reportProgress: true,   // Report upload progress
+      responseType: 'json'
+    });
+     return this.http.request(req);  // Return an observable for the HTTP request
+  }
 }
