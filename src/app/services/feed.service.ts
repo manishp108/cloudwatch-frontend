@@ -1,23 +1,35 @@
 import { Injectable } from "@angular/core";
+import { HttpClient, HttpParams, HttpHeaders } from "@angular/common/http";
+import { Feed } from "../models/feed.model";
+import { environment } from "../environment";
 import { Observable, of } from "rxjs";
 
 @Injectable({
   providedIn: "root",
 })
 export class FeedService {
-  // Returns an empty list of feeds instantly
-  getFeeds(pageNumber: number, pageSize: number, userId?: string): Observable<any> {
-    return of({ blogPostsMostRecent: [] });
-  }
+   private apiUrl = environment.apiUrl;
 
-  getPostComments(postId: any): Observable<any[]> {
-    return of([]);
-  }
+  constructor(private http: HttpClient) {}
 
-  // Placeholder methods to prevent compilation errors
-  likeUnlikePost(data: any): Observable<any> { return of({}); }
-  postComment(data: any): Observable<any> { return of({}); }
-  updatePostComment(id: any, content: any): Observable<any> { return of({}); }
-  deletePostComment(id: any): Observable<any> { return of({}); }
-  reportPost(data: any): Observable<any> { return of({}); }
+  getFeeds(
+    pageNumber: number,
+    pageSize: number,
+    userId?: string
+  ): Observable<Feed[]> {
+    let params = new HttpParams()
+      .set("pageNumber", pageNumber.toString())
+      .set("pageSize", pageSize.toString());
+    if (userId) {
+      params = params.set("userId", userId);
+    }
+    const headers = new HttpHeaders({
+      "Cache-Control": "public, max-age=3600",
+      Pragma: "cache",
+    });
+    return this.http.get<Feed[]>(`${this.apiUrl}/Feeds/getUserFeeds`, {
+      params,
+      headers,
+    });
+  }
 }
