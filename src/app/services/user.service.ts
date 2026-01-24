@@ -20,5 +20,7 @@ generateUserId(): Observable<UserData> {
     const sanitizedUrl = this.apiUrl + "/Users/getUser/?userId=" + userId;
     return this.http.get<UserData>(sanitizedUrl);
   }
-  
+  verifyGoogleToken(token: string): Observable<UserData> {
+    return this.http.post<UserData>(`${this.apiUrl}/Account/google-verify-token`, { token });
+  }
 }
