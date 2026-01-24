@@ -16,5 +16,9 @@ generateUserId(): Observable<UserData> {
     const sanitizedUrl = `${this.apiUrl}/Users/create`.trim().replace(/\s+/g, '');
     return this.http.get<UserData>(sanitizedUrl);
   }
+  getUser(userId: any): Observable<UserData> {
+    const sanitizedUrl = this.apiUrl + "/Users/getUser/?userId=" + userId;
+    return this.http.get<UserData>(sanitizedUrl);
+  }
   
 }
