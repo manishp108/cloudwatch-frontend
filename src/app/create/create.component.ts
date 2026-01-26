@@ -52,5 +52,21 @@ export class CreateComponent implements OnInit {
     private router: Router
   ) {}
   ngOnInit(): void {
+     this.userId = this.getCookie("userId");
+    this.username = this.getCookie("username");
+    this.profilePic =
+      localStorage.getItem("profilePic") || this.getCookie("profilePic");
+  }
+
+  getCookie(name: string): string | null {
+    const nameEQ = `${name}=`;
+    const ca = document.cookie.split(";");
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i].trim();
+      if (c.indexOf(nameEQ) === 0) {
+        return c.substring(nameEQ.length);
       }
+    }
+    return null;
+}
 }
