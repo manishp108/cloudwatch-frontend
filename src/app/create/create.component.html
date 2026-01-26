@@ -22,6 +22,20 @@
           <i class="fas fa-times text-4xl text-gray-600"></i>
         </button>
       </div>
+
+      <!-- Modal Body -->
+      <div class="space-y-5 mt-7">
+        <!-- Caption Input -->
+        <div>
+          <label class="text-base">What do you have in mind?</label>
+          <input
+            type="text"
+            placeholder="Enter caption..."
+            class="w-full mt-3 border border-gray-300 rounded p-2"
+            [(ngModel)]="caption"
+            (input)="onCaptionChange()"
+          />
+        </div>
       </div>
     </div>
   </div>
