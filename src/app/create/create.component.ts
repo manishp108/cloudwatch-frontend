@@ -1,4 +1,5 @@
 import { Component, OnInit } from "@angular/core";
+import { UploadService } from "../services/upload.service";
 import { SharedService } from "../services/shared.service";
 import { HttpEventType, HttpErrorResponse } from "@angular/common/http";
 import { Router } from "@angular/router";
@@ -48,6 +49,7 @@ export class CreateComponent implements OnInit {
   imageExtensions = /\.(jpg|jpeg|png|gif|webp)$/i;
 
   constructor(
+    private uploadService: UploadService,
     private sharedService: SharedService,
     private router: Router
   ) {}
@@ -113,5 +115,55 @@ getCookie(name: string): string | null {
     this.isModalOpen = false;
     this.router.navigate(["/feeds"]);
   }
-    
+    uploadFile(): void {
+    const userId = this.getCookie("userId");
+    const username = this.getCookie("username");
+    if (this.selectedFile && userId && username) {
+      this.isUploading = true;
+      this.errorMessage = null;
+      const formData = new FormData();
+
+      formData.append("file", this.selectedFile);
+      formData.append("userId", userId);
+      formData.append("userName", username);
+      formData.append("fileName", this.selectedFile.name);
+
+      if (this.caption && this.caption.length > 0) {
+        formData.append ("caption", this.caption);
+      }
+
+      if (this.profilePic) {
+        formData.append("profilePic", this.profilePic);
+      }
+
+      this.uploadService.uploadFile(formData).subscribe(
+        (event) => {
+          if (event.type === HttpEventType.UploadProgress && event.total) {
+            this.uploadProgress = Math.round(
+              (100 * event.loaded) / event.total
+            );
+          } else if (event.type === HttpEventType.Response) {
+            this.uploadSuccess = true;
+            setTimeout(() => {
+              this.isUploading = false;
+              this.router.navigate(["/feeds"]);
+            }, 3000);
+          }
+        },
+        (error: HttpErrorResponse) => {
+          if (error.status === 400 && error.error?.errors) {
+            this.errorMessage =
+              "Validation Error: " +
+              Object.values(error.error.errors).join(", ");
+          } else {
+            this.errorMessage = "Upload failed. Please try again later.";
+          }
+          this.isUploading = false;
+        }
+      );
+    } else {
+      this.errorMessage =
+        "User data or file is missing. Please select a file and try again.";
+    }
+  }
 }
