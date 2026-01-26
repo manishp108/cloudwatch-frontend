@@ -28,6 +28,8 @@ export class FeedsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+
+    
     console.log("FeedsComponent loaded.");
   
       this.sharedService.getUserId().subscribe((userId) => {
