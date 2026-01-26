@@ -36,7 +36,27 @@
             (input)="onCaptionChange()"
           />
         </div>
-      </div>
-    </div>
+
+        <!-- File Upload Area -->
+        <div>
+          <div
+            class="w-full h-52 relative border rounded-lg overflow-hidden bg-repeat"
+          >
+            <label
+              for="createStatusUrl"
+              class="flex flex-col justify-center items-center w-full h-full absolute -translate-x-1/2 left-1/2 bottom-0 z-10 pb-6 pt-10 cursor-pointer bg-gradient-to-t from-gray-700/60"
+            >
+              <input
+                id="createStatusUrl"
+                type="file"
+                class="hidden"
+                (change)="onFileSelected($event)"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/webp, video/mp4, video/ogg, video/webm"
+              />
+              <ion-icon name="image" class="text-3xl text-teal-900"></ion-icon>
+              <span class="text-white text-xl mt-32"
+                >Upload image or video</span
+              >
+            </label>    </div>
   </div>
 </div>
