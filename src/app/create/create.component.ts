@@ -51,14 +51,53 @@ export class CreateComponent implements OnInit {
     private sharedService: SharedService,
     private router: Router
   ) {}
+  onFileSelected(event: any): void {
+    this.errorMessage = null;
+    this.selectedFile = event.target.files[0] || null;
+    this.imgPreview = null;
+
+    if (!this.selectedFile) {
+      return;
+    }
+
+    if (this.selectedFile.size > this.MAX_FILE_SIZE) {
+      this.errorMessage = `File size exceeds ${
+        this.MAX_FILE_SIZE / (1024 * 1024)
+      } MB. Please select a smaller file.`;
+      this.selectedFile = null;
+      return;
+    }
+
+    if (
+      !(
+        this.imageExtensions.test(this.selectedFile.name.toLowerCase()) ||
+        this.videoExtensions.test(this.selectedFile.name.toLowerCase()) ||
+        this.audioExtensions.test(this.selectedFile.name.toLowerCase())
+      )
+    ) {
+      this.errorMessage =
+        "Invalid file type. Only images and videos are allowed.";
+      this.selectedFile = null;
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.imgPreview = e.target.result;
+    };
+    reader.readAsDataURL(this.selectedFile);
+  }
+
+  onCaptionChange(): void {
+    this.caption = this.caption.replace(/[<>]/g, "");
+  }
   ngOnInit(): void {
      this.userId = this.getCookie("userId");
     this.username = this.getCookie("username");
     this.profilePic =
       localStorage.getItem("profilePic") || this.getCookie("profilePic");
   }
-
-  getCookie(name: string): string | null {
+getCookie(name: string): string | null {
     const nameEQ = `${name}=`;
     const ca = document.cookie.split(";");
     for (let i = 0; i < ca.length; i++) {
@@ -67,6 +106,12 @@ export class CreateComponent implements OnInit {
         return c.substring(nameEQ.length);
       }
     }
-    return null;
-}
+    return null; 
+  } 
+
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.router.navigate(["/feeds"]);
+  }
+    
 }
