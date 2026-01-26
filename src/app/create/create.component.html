@@ -10,7 +10,19 @@
   <div class="lg:p-20 relative">
     <div
       class="bg-white dark:bg-dark2 p-7 shadow-xl rounded-lg md:w-[520px] w-full"
-    > </div>
+    >
+      <!-- Modal Header -->
+      <div class="text-center py-3 border-b dark:border-slate-700 relative">
+        <h2 class="text-sm font-medium">Create Post</h2>
+        <button
+          type="button"
+          class="absolute top-0 right-0"
+          (click)="closeModal()"
+        >
+          <i class="fas fa-times text-4xl text-gray-600"></i>
+        </button>
+      </div>
+      </div>
     </div>
   </div>
 </div>
