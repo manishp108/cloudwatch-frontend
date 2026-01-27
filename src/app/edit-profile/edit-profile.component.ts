@@ -27,13 +27,32 @@ export class EditProfileComponent implements OnInit {
     private router: Router
   ) {}
   ngOnInit(): void {}
+  
+  ngAfterViewInit(): void {
+    // Initialize Google sign-in if needed.
+    this.waitForGoogleScriptAndInitialize();
+  }
+      private waitForGoogleScriptAndInitialize() {
+    if (
+      typeof google !== "undefined" &&
+      google.accounts &&
+      google.accounts.id
+    ) {
+
+      this.initializeGoogleSignIn();
+    } else {
+      setTimeout(() => this.waitForGoogleScriptAndInitialize(), 500);
+    }
+  
+}
+
     formatUsername(username: string): string {
     if (!username) return "";
     return username.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
   }
 
   getDisplayName(user: UserData): string {
-    if (user.firstName.trim() || user.lastName.trim()) {
+    if (user.firstName.trim()   || user.lastName.trim()) {
       return (user.firstName + " " + user.lastName).trim();
     }
     return user.username ? this.formatUsername(user.username) : "";
@@ -95,4 +114,57 @@ export class EditProfileComponent implements OnInit {
     document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
   
    }
+  initializeGoogleSignIn(): void {
+    if (typeof google === "undefined") {
+      console.error("Google Identity Services script not loaded");
+      return;
+    }
+    const clientId = environment.GOOGLE_CLIENT_ID;
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: this.handleCredentialResponse.bind(this),
+      auto_select: true,
+    });
+    const btnContainer = document.getElementById("googleSignInDiv");
+    if (btnContainer) {
+      btnContainer.innerHTML = "";
+      google.accounts.id.renderButton(btnContainer, {
+        theme: "outline",
+        size: "large",
+      });
+    }
+  }
+
+  handleCredentialResponse(response: any): void {
+    console.log("Google JWT token:", response.credential);
+    this.userService.verifyGoogleToken(response.credential).subscribe(
+      (userData: any) => {
+        this.ngZone.run(() => {
+          const mappedUser = new UserData(
+            userData.userId,
+            userData.username,
+            userData.firstname || "",
+            userData.lastname || "",
+            userData.profilePic,
+            userData.isVerified.toString()
+          );
+          this.setPersistentData(mappedUser);
+          const displayName = this.getDisplayName(mappedUser);
+          this.sharedService.setUserInfo(
+            mappedUser.userId,
+            displayName,
+            mappedUser.profilePic
+          );
+          this.generatedUserData = mappedUser;
+          this.signedIn = true;
+          this.getUser(mappedUser.userId, true);
+          this.profileDropdownOpen = false;
+          this.cd.detectChanges();
+          // Immediately redirect to the /feeds page afte r successful sign-in.
+          this.router.navigate(["/feeds"]);
+        });
+      },
+      (error: any) => console.error("Error verifying Google token:", error)
+    );
+  }
 }
