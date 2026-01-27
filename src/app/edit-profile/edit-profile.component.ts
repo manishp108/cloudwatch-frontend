@@ -17,7 +17,7 @@ export class EditProfileComponent implements OnInit, AfterViewInit {
   generatedUserData: UserData = new UserData("", "", "", "", "", "false");
   profileDropdownOpen: boolean = false;
   signedIn: boolean = false;
-  isLoading: boolean = false; 
+  isLoading: boolean = false; // Added loading state
 
   constructor(
     private userService: UserService,
