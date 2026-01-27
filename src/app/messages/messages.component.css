@@ -1,0 +1,94 @@
+/* Container for the entire chat screen */
+.chat-container {
+  height: 100%; /* Full viewport height */
+  overflow: hidden; /* Hide any overflow */
+  background: #f5f5f5;
+}
+
+/* Sidebar (chat list) */
+.user-list {
+  height: 100%;
+  overflow: hidden; /* Disable scroll */
+  background: #fff;
+  border-right: 1px solid #ddd;
+}
+
+/* Chat area container */
+.chat-area {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+/* Chat header: fixed height */
+.chat-header {
+  height: 60px;
+  flex: 0 0 auto;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+}
+
+/* Chat body: occupies remaining space, no scroll */
+.chat-body {
+  flex: 1 1 auto;
+  overflow: hidden; /* Hide scrollbars */
+  padding: 15px;
+  background: #f4f5f7;
+}
+
+/* Chat footer: fixed height */
+.chat-footer {
+  height: 60px;
+  flex: 0 0 auto;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  background: #fff;
+  display: flex;
+  align-items: center;
+}
+
+/* Ensure the form inside the footer takes full width */
+.chat-footer form {
+  display: flex;
+  width: 100%;
+}
+
+/* Ensure the input takes full available width */
+.chat-footer form .form-control {
+  flex: 1;
+  width: 100%;
+}
+
+/* Chat message bubbles */
+.msg-sent,
+.msg-received {
+  display: inline-block;
+  max-width: 80%;
+  word-wrap: break-word;
+  margin-bottom: 10px;
+  padding: 10px 15px;
+  border-radius: 15px;
+}
+
+/* Sent messages (from you) */
+.msg-sent {
+  background: #4b7bec;
+  color: #fff;
+  align-self: flex-end;
+}
+
+/* Received messages */
+.msg-received {
+  background: #e9ecef;
+  color: #333;
+  align-self: flex-start;
+}
+
+/* Hide native scrollbar if any element still shows one */
+::-webkit-scrollbar {
+  display: none;
+}
