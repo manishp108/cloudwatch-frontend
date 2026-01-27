@@ -71,5 +71,10 @@
       </a>
     </div>
   </div>
- 
+  <div
+    id="googleSignInDiv"
+    class="flex justify-center mt-2 w-full border-0"
+    *ngIf="!signedIn || generatedUserData.isVerified !== 'true'"
+  ></div>
+  
 </div>
