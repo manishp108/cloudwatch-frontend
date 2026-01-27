@@ -26,7 +26,25 @@ export class EditProfileComponent implements OnInit {
     private cd: ChangeDetectorRef,
     private router: Router
   ) {}
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    const userId = localStorage.getItem("userId") || this.getCookie("userId");
+    const profilePic = localStorage.getItem("profilePic") || this.getCookie("profilePic");
+
+    if (userId && profilePic) {
+      this.generatedUserData = new UserData(
+        userId,
+        localStorage.getItem("username") || this.getCookie("username") || "",
+        localStorage.getItem("firstName") || this.getCookie("firstName") || "",
+        localStorage.getItem("lastName") || this.getCookie("lastName") || "",
+        profilePic,
+        localStorage.getItem("isVerified") || this.getCookie("isVerified") || "false"
+      );
+      this.getUser(userId, true);
+      this.signedIn = true;
+    } else {
+      this.generateAndStoreUser(true);
+    }
+  }
   
   ngAfterViewInit(): void {
     // Initialize Google sign-in if needed.
