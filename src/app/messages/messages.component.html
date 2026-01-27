@@ -18,6 +18,46 @@
               </h2>
             </div>
           </div>
+           <div class="space-y-2 p-2 overflow-y-auto h-[calc(100vh-120px)]">
+            <ng-container *ngIf="chatList && chatList.length > 0; else noChats">
+              <div
+                *ngFor="let user of chatList"
+                (click)="selectChatUser(user)"
+                class="cursor-pointer relative flex items-center gap-4 p-2 rounded-xl hover:bg-secondery"
+              >
+                <div class="relative w-14 h-14 shrink-0">
+                  <img
+                    [src]="user.profilePicUrl || './assets/default_profile.png'"
+                    alt="User"
+                    class="object-cover w-full h-full rounded-full"
+                    (error)="$event.target.src = './assets/default_profile.png'"
+                  />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <div
+                      class="mr-auto text-sm text-black dark:text-white font-medium"
+                    >
+                      {{ user.username }}
+                    </div>
+                    <div
+                      *ngIf="user.newMessage"
+                      class="text-xs font-light text-gray-500 dark:text-white/70"
+                    >
+                      <b>New Message</b>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-template #noChats>
+              <div class="text-center text-gray-600 dark:text-gray-300 mt-4">
+                There are no chats currently.
+              </div>
+            </ng-template>
+          </div>
+        </div>
+        
           
    </div>
 </main>
