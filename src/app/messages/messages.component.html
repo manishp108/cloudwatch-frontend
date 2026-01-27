@@ -173,6 +173,34 @@
               </ng-container>
             </div>
           </div>
+          <!-- Chat Footer -->
+          <div
+            class="flex items-center md:gap-4 gap-2 md:px-3 p-2 overflow-hidden border-t"
+          >
+            <!-- Removed the form tag to avoid duplicate submission -->
+            <div class="flex items-center w-full">
+              <div class="flex justify-center relative flex-1">
+                <textarea
+                  placeholder="Write your message"
+                  rows="1"
+                  class="w-full resize-none bg-secondery border-2 rounded-full px-4 py-2 focus:outline-none"
+                  [(ngModel)]="message"
+                  name="message"
+                  (keydown.enter)="onEnter($event)"
+                >
+                </textarea>
+              </div>
+              <button
+                type="button"
+                class="flex items-center justify-center p-2 rounded-full hover:bg-gray-300 transition-colors"
+                (click)="sendMessage()"
+              >
+                <i class="fa fa-paper-plane text-2xl"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
         
           
    </div>
