@@ -141,6 +141,38 @@
               </button>
             </div>
           </div>
+          
+          <!-- Chat Body -->
+          <div id="chatBody" #chatBody class="flex-1 overflow-y-auto">
+            <div class="space-y-4 p-4 h-[65dvh] sm:h-full">
+              <ng-container *ngFor="let msg of receivedMessages">
+                <div
+                  [ngClass]="
+                    msg.type === 'reply'
+                      ? 'flex justify-end'
+                      : 'flex justify-start'
+                  "
+                >
+                  <pre
+                    [ngClass]="
+                      msg.type === 'reply'
+                        ? 'px-4 py-2 rounded-xl max-w-sm bg-gradient-to-tr from-sky-500 to-blue-500 text-white shadow whitespace-pre-wrap break-words'
+                        : 'px-4 py-2 rounded-xl max-w-sm bg-gray-200 text-gray-800 shadow whitespace-pre-wrap break-words'
+                    "
+                  >
+                {{ msg.message }}
+              </pre
+                  >
+                </div>
+                <div
+                  [ngClass]="msg.type === 'reply' ? 'text-right' : 'text-left'"
+                  class="text-xs text-gray-500"
+                >
+                  {{ msg.msgtime }}
+                </div>
+              </ng-container>
+            </div>
+          </div>
         
           
    </div>
