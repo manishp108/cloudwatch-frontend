@@ -57,6 +57,15 @@
             </ng-template>
           </div>
         </div>
+         <div
+          class="fixed inset-0 bg-slate-800/40 backdrop-blur transition-opacity duration-300 md:hidden"
+          [ngClass]="{
+            'opacity-100': sidebarVisible,
+            'opacity-0 pointer-events-none': !sidebarVisible
+          }"
+          (click)="toggleSidebar()"
+        ></div>
+      </div>
         
           
    </div>
