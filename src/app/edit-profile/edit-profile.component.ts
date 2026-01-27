@@ -48,6 +48,37 @@ export class EditProfileComponent implements OnInit {
     }
     return null;
   }
+  getUser(userId: any, storePersistence: boolean) {
+    this.userService.getUser(userId).subscribe(
+      (response: any) => {
+        if (!response.userId) return;
+        this.generatedUserData = new UserData(
+          response.userId, response.username, response.firstname || "",
+          response.lastname || "", response.profilePic, response.isVerified.toString()
+        );
+        if (storePersistence) this.setPersistentData(this.generatedUserData);
+        this.sharedService.setUserInfo(this.generatedUserData.userId, this.getDisplayName(this.generatedUserData), this.generatedUserData.profilePic);
+        this.cd.detectChanges();
+      },
+      (error) => console.error("Error fetching user data:", error)
+    );
+  }
+
+  generateAndStoreUser(storePersistence: boolean) {
+    this.userService.generateUserId().subscribe(
+      (response: any) => {
+        this.generatedUserData = new UserData(
+          response.userId, response.username, response.firstname || "",
+          response.lastname || "", response.profilePic, "false"
+        );
+        if (storePersistence) this.setPersistentData(this.generatedUserData);
+        this.sharedService.setUserInfo(this.generatedUserData.userId, this.getDisplayName(this.generatedUserData), this.generatedUserData.profilePic);
+        this.signedIn = true;
+        this.cd.detectChanges();
+      },
+      (error) => console.error("Error generating user data:", error)
+    );
+  }
 
   setPersistentData(userData: UserData): void {
     const fields = ['userId', 'firstName', 'lastName', 'profilePic', 'isVerified', 'username'];
