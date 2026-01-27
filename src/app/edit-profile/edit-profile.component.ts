@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, NgZone, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, NgZone, OnInit, AfterViewInit } from "@angular/core";
 import { SharedService } from "../services/shared.service";
 import { UserData } from "../models/user-data.model";
 import { UserService } from "../services/user.service";
@@ -6,26 +6,27 @@ import { environment } from "../environment";
 import { Router } from "@angular/router";
 
 declare const google: any;
+
 @Component({
   selector: "app-edit-profile",
   templateUrl: "./edit-profile.component.html",
   styleUrls: ["./edit-profile.component.css"],
 })
-export class EditProfileComponent implements OnInit {
+export class EditProfileComponent implements OnInit, AfterViewInit {
   profileImgError: boolean = false;
   generatedUserData: UserData = new UserData("", "", "", "", "", "false");
   profileDropdownOpen: boolean = false;
   signedIn: boolean = false;
+  isLoading: boolean = false; 
 
   constructor(
     private userService: UserService,
-    // private dialog: MatDialog,
     private sharedService: SharedService,
-    // private signalRService: SignalRService,
     private ngZone: NgZone,
     private cd: ChangeDetectorRef,
     private router: Router
   ) {}
+
   ngOnInit(): void {
     const userId = localStorage.getItem("userId") || this.getCookie("userId");
     const profilePic = localStorage.getItem("profilePic") || this.getCookie("profilePic");
@@ -45,32 +46,27 @@ export class EditProfileComponent implements OnInit {
       this.generateAndStoreUser(true);
     }
   }
-  
+
   ngAfterViewInit(): void {
-    // Initialize Google sign-in if needed.
     this.waitForGoogleScriptAndInitialize();
   }
-      private waitForGoogleScriptAndInitialize() {
-    if (
-      typeof google !== "undefined" &&
-      google.accounts &&
-      google.accounts.id
-    ) {
 
+  private waitForGoogleScriptAndInitialize() {
+    if (typeof google !== "undefined" && google.accounts && google.accounts.id) {
       this.initializeGoogleSignIn();
     } else {
       setTimeout(() => this.waitForGoogleScriptAndInitialize(), 500);
     }
-  
-}
+  }
 
-    formatUsername(username: string): string {
+
+  formatUsername(username: string): string {
     if (!username) return "";
     return username.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
   }
 
   getDisplayName(user: UserData): string {
-    if (user.firstName.trim()   || user.lastName.trim()) {
+    if (user.firstName.trim() || user.lastName.trim()) {
       return (user.firstName + " " + user.lastName).trim();
     }
     return user.username ? this.formatUsername(user.username) : "";
@@ -85,19 +81,50 @@ export class EditProfileComponent implements OnInit {
     }
     return null;
   }
+
+
+  setPersistentData(userData: UserData): void {
+    const dataMap: any = {
+      userId: userData.userId,
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      profilePic: userData.profilePic,
+      isVerified: userData.isVerified,
+      username: userData.username
+    };
+
+    Object.keys(dataMap).forEach(key => {
+      this.setCookie(key, dataMap[key], 365);
+      localStorage.setItem(key, dataMap[key]);
+    });
+  }
+
+  setCookie(name: string, value: string, days: number) {
+    const d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
+  }
+
+
   getUser(userId: any, storePersistence: boolean) {
+    this.isLoading = true;
     this.userService.getUser(userId).subscribe(
       (response: any) => {
-        if (!response.userId) return;
-        this.generatedUserData = new UserData(
-          response.userId, response.username, response.firstname || "",
-          response.lastname || "", response.profilePic, response.isVerified.toString()
-        );
-        if (storePersistence) this.setPersistentData(this.generatedUserData);
-        this.sharedService.setUserInfo(this.generatedUserData.userId, this.getDisplayName(this.generatedUserData), this.generatedUserData.profilePic);
+        if (response.userId) {
+          this.generatedUserData = new UserData(
+            response.userId, response.username, response.firstname || "",
+            response.lastname || "", response.profilePic, response.isVerified.toString()
+          );
+          if (storePersistence) this.setPersistentData(this.generatedUserData);
+          this.sharedService.setUserInfo(this.generatedUserData.userId, this.getDisplayName(this.generatedUserData), this.generatedUserData.profilePic);
+        }
+        this.isLoading = false;
         this.cd.detectChanges();
       },
-      (error) => console.error("Error fetching user data:", error)
+      (error) => {
+        this.isLoading = false;
+        console.error("Error fetching user data:", error);
+      }
     );
   }
 
@@ -117,72 +144,48 @@ export class EditProfileComponent implements OnInit {
     );
   }
 
-  setPersistentData(userData: UserData): void {
-    const fields = ['userId', 'firstName', 'lastName', 'profilePic', 'isVerified', 'username'];
-    fields.forEach(field => {
-      const value = (userData as any)[field];
-      this.setCookie(field, value, 365);
-      localStorage.setItem(field, value);
-    });
-  }
 
-  setCookie(name: string, value: string, days: number) {
-    const d = new Date();
-    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
-  
-   }
   initializeGoogleSignIn(): void {
-    if (typeof google === "undefined") {
-      console.error("Google Identity Services script not loaded");
-      return;
-    }
-    const clientId = environment.GOOGLE_CLIENT_ID;
+    if (typeof google === "undefined") return;
     google.accounts.id.initialize({
-      client_id: clientId,
+      client_id: environment.GOOGLE_CLIENT_ID,
       callback: this.handleCredentialResponse.bind(this),
       auto_select: true,
     });
     const btnContainer = document.getElementById("googleSignInDiv");
     if (btnContainer) {
-      btnContainer.innerHTML = "";
-      google.accounts.id.renderButton(btnContainer, {
-        theme: "outline",
-        size: "large",
-      });
+      google.accounts.id.renderButton(btnContainer, { theme: "outline", size: "large" });
     }
   }
 
   handleCredentialResponse(response: any): void {
-    console.log("Google JWT token:", response.credential);
     this.userService.verifyGoogleToken(response.credential).subscribe(
       (userData: any) => {
         this.ngZone.run(() => {
           const mappedUser = new UserData(
-            userData.userId,
-            userData.username,
-            userData.firstname || "",
-            userData.lastname || "",
-            userData.profilePic,
-            userData.isVerified.toString()
+            userData.userId, userData.username, userData.firstname || "",
+            userData.lastname || "", userData.profilePic, userData.isVerified.toString()
           );
           this.setPersistentData(mappedUser);
-          const displayName = this.getDisplayName(mappedUser);
-          this.sharedService.setUserInfo(
-            mappedUser.userId,
-            displayName,
-            mappedUser.profilePic
-          );
           this.generatedUserData = mappedUser;
           this.signedIn = true;
-          this.getUser(mappedUser.userId, true);
-          this.profileDropdownOpen = false;
-          this.cd.detectChanges();
-          // Immediately redirect to the /feeds page afte r successful sign-in.
           this.router.navigate(["/feeds"]);
         });
       },
       (error: any) => console.error("Error verifying Google token:", error)
     );
+  }
+
+  logout(): void {
+    localStorage.clear();
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+    }
+    this.signedIn = false;
+    this.router.navigate(["/"]);
   }
 }
