@@ -148,8 +148,59 @@ export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   startAudioCall() {}
   startVideoCall() {}
-  sendMessage() {}
-  onEnter(event: any) {}
+  
+  sendMessage(): void {
+    if (this.isSendingMessage) {
+      return; // Prevent duplicate sends
+    }
+    if (!this.userId || !this.chat_with_userId || !this.message.trim()) {
+      return;
+    }
+    this.isSendingMessage = true;
+    this.chatService
+      .sendMessage(
+        this.chatId,
+        this.userId,
+        this.chat_with_userId,
+        this.message
+      )
+      .subscribe({
+        next: (response: any) => {
+          if (!this.chatId && response.chatId) {
+            this.chatId = response.chatId;
+            this.getChats(this.userId);
+          }
+          const newMsg = {
+            message: this.message,
+            type: "reply",
+            msgtime: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          };
+          // To avoid duplicates, check if the message exists already.
+          if (!this.messageExists(newMsg)) {
+            this.receivedMessages.push(newMsg);
+          }
+          this.message = "";
+          setTimeout(() => {
+            this.scrollToBottom(true);
+            this.isSendingMessage = false;
+          }, 100);
+        },
+        error: (error) => {
+          console.error("Error sending message", error);
+          this.isSendingMessage = false;
+        },
+      });
+  }
+
+
+   onEnter(event: KeyboardEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.sendMessage();
+  }
   
   private scrollToBottom(force: boolean = false): void {
     try {
@@ -166,5 +217,16 @@ export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
       console.error("Error scrolling chat to bottom:", err);
     }
   }
+
+  private messageExists(newMessage: any): boolean {
+    // Check if a message with the same content, type and time already exists.
+    return this.receivedMessages.some(
+      (msg) =>
+        msg.message === newMessage.message &&
+        msg.type === newMessage.type &&
+        msg.msgtime === newMessage.msgtime
+    );
+  }
+
 
 }
