@@ -1,6 +1,8 @@
 <main class="2xl:ml-[--w-side] xl:ml-[--w-side-md] md:ml-[--w-side-small]">
-  class="2xl:max-w-6xl mx-auto h-full relative shadow-lg overflow-hidden border1 max-md:pt-14"
-   <div class="flex bg-white dark:bg-dark2">
+  <div
+    class="2xl:max-w-6xl mx-auto h-full relative shadow-lg overflow-hidden border1 max-md:pt-14"
+  >
+    <div class="flex bg-white dark:bg-dark2">
       <!-- Chat Sidebar -->
       <div class="md:w-[360px] relative border-r dark:border-slate-200">
         <div
@@ -18,7 +20,8 @@
               </h2>
             </div>
           </div>
-           <div class="space-y-2 p-2 overflow-y-auto h-[calc(100vh-120px)]">
+          <!-- Chat Users List -->
+          <div class="space-y-2 p-2 overflow-y-auto h-[calc(100vh-120px)]">
             <ng-container *ngIf="chatList && chatList.length > 0; else noChats">
               <div
                 *ngFor="let user of chatList"
@@ -57,7 +60,8 @@
             </ng-template>
           </div>
         </div>
-         <div
+        <!-- Mobile Backdrop to toggle sidebar -->
+        <div
           class="fixed inset-0 bg-slate-800/40 backdrop-blur transition-opacity duration-300 md:hidden"
           [ngClass]="{
             'opacity-100': sidebarVisible,
@@ -66,7 +70,7 @@
           (click)="toggleSidebar()"
         ></div>
       </div>
-      
+
       <!-- Message Center -->
       <ng-container *ngIf="chat_with_userId; else noChatSelected">
         <div class="flex-1 flex flex-col h-[88dvh] sm:h-[93.6dvh]">
@@ -141,7 +145,7 @@
               </button>
             </div>
           </div>
-          
+
           <!-- Chat Body -->
           <div id="chatBody" #chatBody class="flex-1 overflow-y-auto">
             <div class="space-y-4 p-4 h-[65dvh] sm:h-full">
@@ -173,6 +177,7 @@
               </ng-container>
             </div>
           </div>
+
           <!-- Chat Footer -->
           <div
             class="flex items-center md:gap-4 gap-2 md:px-3 p-2 overflow-hidden border-t"
@@ -201,7 +206,9 @@
           </div>
         </div>
       </ng-container>
-        <ng-template #noChatSelected>
+
+      <!-- Placeholder when no chat is selected -->
+      <ng-template #noChatSelected>
         <div class="flex-1 flex items-center h-[90dvh] justify-center">
           <p class="text-xl text-gray-600 dark:text-gray-300">
             Select a chat to start messaging
@@ -209,7 +216,5 @@
         </div>
       </ng-template>
     </div>
-          
-   </div>
+  </div>
 </main>
-    

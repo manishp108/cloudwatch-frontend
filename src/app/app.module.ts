@@ -5,6 +5,7 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { MatDialogModule } from "@angular/material/dialog";
 import { MatButtonModule } from "@angular/material/button";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
+import { MessagesComponent } from "./messages/messages.component";
 import { FormsModule } from "@angular/forms";
 
 import { AppComponent } from "./app.component";
@@ -16,6 +17,7 @@ import { FeedService } from "./services/feed.service";
 @NgModule({
   declarations: [
     AppComponent,
+    MessagesComponent,
     FeedsComponent, 
   ],
   imports: [
