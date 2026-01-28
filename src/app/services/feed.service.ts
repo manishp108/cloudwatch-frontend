@@ -32,5 +32,8 @@ export class FeedService {
       headers,
     });
   }
-  
+getChats(userId: string): Observable<Feed[]> {
+    let params = new HttpParams().set("userId", userId.toString());
+    return this.http.get<any[]>(`${this.apiUrl}/Feeds/getChats`, { params });
+  }  
 }

@@ -27,7 +27,6 @@ export class SharedService {
   }
 
  
-
   getchat_UserId(): Observable<string | null> {
     return this.chat_userIdSubject.asObservable();
   }

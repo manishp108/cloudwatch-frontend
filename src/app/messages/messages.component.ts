@@ -73,6 +73,37 @@ export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
           (this.chat_with_profilepic = chat_with_profilepic)
       );
   }
+  
+  getChats(uid: any) {
+    if (this.loading) return;
+    this.loading = true;
+    this.chatService.getChatUsers(uid).subscribe(
+      (response: any[]) => {
+        this.chatList = response;
+        this.loading = false;
+        if (
+          !this.chat_with_userId &&
+          this.chatList &&
+          this.chatList.length > 0
+        ) {
+          let chatUser = this.chatList[0];
+          this.chat_with_userId = chatUser.userId;
+          this.chat_with_username = chatUser.username;
+          this.chat_with_profilepic = chatUser.profilePicUrl;
+          this.chatId = chatUser.chatId || null;
+          if (this.chatId) {
+            this.loadChatHistory(this.chatId);
+          }
+        }
+      },
+      (error) => {
+        this.loading = false;
+        console.error("Error loading chat users:", error);
+      }
+    );
+  }
+
+  
   ngAfterViewChecked() {}
   ngOnDestroy() {}
 
@@ -83,7 +114,6 @@ export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
   sendMessage() {}
   onEnter(event: any) {}
   
-  getChats(uid: any) {}
   loadChatHistory(id: string) {}
   private scrollToBottom(force: boolean = false) {}
 }
