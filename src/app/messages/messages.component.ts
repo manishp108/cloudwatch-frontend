@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked }
 import { Router } from "@angular/router";
 import { MatDialog } from "@angular/material/dialog";
 import { FeedService } from "../services/feed.service";
+import { ChatService } from "../services/chat.service";
 import { SharedService } from "../services/shared.service";
 import { Feed } from "../models/feed.model";
 
@@ -30,11 +31,48 @@ export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
   constructor(
     private feedService: FeedService,
     private sharedService: SharedService,
+    private chatService: ChatService,
     private router: Router,
     private dialog: MatDialog
   ) {}
 
-  ngOnInit() {}
+    
+  ngOnInit() {
+    // Subscribe for userId and username from shared service (or cookies)
+    this.sharedService.getUserId().subscribe((userId) => {
+      this.userId = userId;
+    });
+    this.sharedService.getUserId().subscribe((username) => {
+      this.username = username;
+    });
+
+    const uId = this.sharedService.getCookie("userId");
+    if (uId) {
+      this.userId = uId;
+      this.checkNewChat();
+      this.getChats(uId);
+    }
+
+
+  }
+  checkNewChat() {
+    this.sharedService
+      .getchat_UserId()
+      .subscribe(
+        (chat_with_userId) => (this.chat_with_userId = chat_with_userId)
+      );
+    this.sharedService
+      .getchat_Username()
+      .subscribe(
+        (chat_with_username) => (this.chat_with_username = chat_with_username)
+      );
+    this.sharedService
+      .getchat_ProfilePic()
+      .subscribe(
+        (chat_with_profilepic) =>
+          (this.chat_with_profilepic = chat_with_profilepic)
+      );
+  }
   ngAfterViewChecked() {}
   ngOnDestroy() {}
 
@@ -45,7 +83,6 @@ export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
   sendMessage() {}
   onEnter(event: any) {}
   
-  checkNewChat() {}
   getChats(uid: any) {}
   loadChatHistory(id: string) {}
   private scrollToBottom(force: boolean = false) {}
