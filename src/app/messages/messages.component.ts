@@ -55,6 +55,26 @@ export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
 
 
   }
+  
+  loadChatHistory(chatId: string) {
+    this.chatService.getChatHistory(chatId).subscribe(
+      (history: any[]) => {
+        this.receivedMessages = history.map((msg) => ({
+          message: msg.content,
+          type: msg.senderId === this.userId ? "reply" : "sender",
+          msgtime: new Date(msg.timestamp).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        }));
+        this.chatId = chatId;
+        setTimeout(() => this.scrollToBottom(true), 0);
+      },
+      (error) => {
+        console.error("Error loading chat history:", error);
+      }
+    );
+  }
   checkNewChat() {
     this.sharedService
       .getchat_UserId()
@@ -101,19 +121,50 @@ export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
         console.error("Error loading chat users:", error);
       }
     );
-  }
 
+  }
   
   ngAfterViewChecked() {}
   ngOnDestroy() {}
 
   toggleSidebar() {}
-  selectChatUser(user: any) {}
+
+  selectChatUser(user: any): void {
+    console.log("User clicked:", user);
+    this.chat_with_userId = user.userId;
+    this.chat_with_username = user.username;
+    this.chat_with_profilepic = user.profilePicUrl;
+    if (user.chatId) {
+      user.newMessage = false;
+      this.chatId = user.chatId;
+      this.loadChatHistory(this.chatId!);
+    } else {
+      this.chatId = null;
+      this.receivedMessages = [];
+    }
+    // Hide the sidebar on mobile view once a user is selected.
+    this.sidebarVisible = false;
+  }
+
   startAudioCall() {}
   startVideoCall() {}
   sendMessage() {}
   onEnter(event: any) {}
   
-  loadChatHistory(id: string) {}
-  private scrollToBottom(force: boolean = false) {}
+  private scrollToBottom(force: boolean = false): void {
+    try {
+      if (this.chatBody && this.chatBody.nativeElement) {
+        const element = this.chatBody.nativeElement;
+        if (
+          force ||
+          element.scrollHeight - element.scrollTop - element.clientHeight < 100
+        ) {
+          element.scrollTop = element.scrollHeight;
+        }
+      }
+    } catch (err) {
+      console.error("Error scrolling chat to bottom:", err);
+    }
+  }
+
 }
