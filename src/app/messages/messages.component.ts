@@ -124,10 +124,14 @@ export class MessagesComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   }
   
-  ngAfterViewChecked() {}
+ngAfterViewChecked() {
+  this.scrollToBottom();
+}
   ngOnDestroy() {}
 
-  toggleSidebar() {}
+  toggleSidebar() {
+    this.sidebarVisible = !this.sidebarVisible;
+  }
 
   selectChatUser(user: any): void {
     console.log("User clicked:", user);
