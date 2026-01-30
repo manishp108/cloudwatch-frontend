@@ -1,0 +1,61 @@
+<nav class="mobile-navigation">
+  <ul class="nav-links">
+    <li>
+      <a routerLink="/feeds" 
+         routerLinkActive="active" 
+         [class.active]="activeItem === 'feeds' || activeItem === 'home'" 
+         (click)="setActive('feeds')">
+        <i class="fa-solid fa-house"></i>
+        <span>Home</span>
+      </a>
+    </li>
+
+    <li>
+      <a routerLink="/search" 
+         routerLinkActive="active" 
+         [class.active]="activeItem === 'search'" 
+         (click)="setActive('search')">
+        <i class="fa-solid fa-search"></i>
+        <span>Search</span>
+      </a>
+    </li>
+
+    <li>
+      <a routerLink="/create" 
+         routerLinkActive="active" 
+         [class.active]="activeItem === 'create'" 
+         (click)="setActive('create')">
+        <i class="fa-regular fa-square-plus create-icon"></i>
+        <span>Create</span>
+      </a>
+    </li>
+
+    <li>
+      <a routerLink="/messages" 
+         routerLinkActive="active" 
+         [class.active]="activeItem === 'messages'" 
+         (click)="setActive('messages')">
+        <i class="fa-regular fa-envelope message-icon"></i>
+        <span>Messages</span>
+      </a>
+    </li>
+
+    <li>
+      <a routerLink="/profile" 
+         routerLinkActive="active" 
+         [class.active]="activeItem === 'profile'" 
+         (click)="setActive('profile')">
+        <div *ngIf="userProfilePic && !profileImgError" class="avatar-container">
+          <img [src]="userProfilePic" 
+               alt="Profile" 
+               class="avatar" 
+               (error)="profileImgError = true" />
+        </div>
+        <div *ngIf="!userProfilePic || profileImgError" class="avatar-fallback">
+          {{ userInitial }}
+        </div>
+        <span>Profile</span>
+      </a>
+    </li>
+  </ul>
+</nav>
