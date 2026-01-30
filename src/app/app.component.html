@@ -1,5 +1,11 @@
-<div style="padding: 40px; font-size: 32px; font-weight: bold;">
-    CloudWatch
-</div>
+<ng-container *ngIf="isMobileView; else desktopView">
+  <router-outlet></router-outlet>
+  <app-mobile-navigation></app-mobile-navigation>
+</ng-container>
 
-<router-outlet></router-outlet>
+<ng-template #desktopView>
+  <tenx-app-navigation></tenx-app-navigation>
+  <div class="content-container">
+    <router-outlet></router-outlet>
+  </div>
+</ng-template>
