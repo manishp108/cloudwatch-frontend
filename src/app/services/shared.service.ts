@@ -25,7 +25,13 @@ export class SharedService {
   getUserId(): Observable<string | null> {
     return this.userIdSubject.asObservable();
   }
+  getUsername(): Observable<string | null> {
+    return this.usernameSubject.asObservable();
+  }
 
+  getProfilePic(): Observable<string | null> {
+    return this.profilePicSubject.asObservable();
+  }
  
   getchat_UserId(): Observable<string | null> {
     return this.chat_userIdSubject.asObservable();
