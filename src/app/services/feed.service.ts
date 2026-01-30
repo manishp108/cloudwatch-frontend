@@ -32,6 +32,12 @@ export class FeedService {
       headers,
     });
   }
+  getPostLikes(postId: string): Observable<any[]> {
+    let params = new HttpParams().set("postId", postId.toString());
+    return this.http.get<any[]>(`${this.apiUrl}/UserPost/post-likes`, {
+      params,
+    });
+  }
 getChats(userId: string): Observable<Feed[]> {
     let params = new HttpParams().set("userId", userId.toString());
     return this.http.get<any[]>(`${this.apiUrl}/Feeds/getChats`, { params });
